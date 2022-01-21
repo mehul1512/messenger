@@ -81,8 +81,8 @@ const registerUser = async (req, res) => {
         //     process.env.JWT_TOKEN_TIME
         // );
 
-        //add auth_token to user data
-        await User.findOneAndUpdate({ email: email }, { auth_token: token });
+        // //add auth_token to user data
+        // await User.findOneAndUpdate({ email: email }, { auth_token: token });
 
         res.status(200).json({ code: 200, result, token });
     } catch (error) {

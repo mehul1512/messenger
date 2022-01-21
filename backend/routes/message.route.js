@@ -8,9 +8,9 @@ const { authMiddleware } = require('../middleware/auth.middleware');
 const router = express.Router();
 
 // add message
-router.post('/', authMiddleware, addChatMessage);
+router.post('/', addChatMessage); // authMiddleware,
 
 //get chat of user
-router.get('/:conversation_id', authMiddleware, getChatMessageOfUser);
+router.get('/:conversation_id', getChatMessageOfUser); // authMiddleware,
 
 module.exports = router;
