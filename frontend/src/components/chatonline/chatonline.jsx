@@ -1,21 +1,22 @@
-import './chatonline.css';
+import React from 'react';
+import './chatOnline.css';
 
-export default function chatonline() {
-  return (
-      <>
-        <div className="chatOnline">
-        <div className="chatOnlineFriend">
-          <div className="chatOnlineImgContainer">
-            <img
-              className="chatOnlineImg"
-              src="person/1.jpeg"
-              alt=""
-            />
-            <div className="chatOnlineBadge"></div>
-          </div>
-          <span className="chatOnlineName">mehul</span>
+function ChatOnline() {
+    return (
+        <div className='chatOnline'>
+            <div className='chatOnlineFriend'>
+                <div className='chatOnlineImgContainer'>
+                    <img
+                        src='https://images.pexels.com/photos/3686769/pexels-photo-3686769.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'
+                        alt=''
+                        className='chatOnlineImg'
+                    />
+                    <div className='chatOnlineBadge'></div>
+                </div>
+                <span className='chatOnlineName'>Dishen</span>
+            </div>
         </div>
-    </div>
-      </>
-  );
+    );
 }
+
+export default ChatOnline;
