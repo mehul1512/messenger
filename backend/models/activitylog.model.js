@@ -12,7 +12,6 @@ const ActivityLogSchema = new mongoose.Schema(
         },
         old_data: {
             type: Object,
-            required: true,
         },
     },
     { timestamps: true }

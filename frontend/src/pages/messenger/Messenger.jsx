@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
-import ChatOnline from '../../components/chatOnline/ChatOnline';
 import Conversation from '../../components/conversations/Conversation';
 import Message from '../../components/message/Message';
 import Topbar from '../../components/topbar/Topbar';
-import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+import { AuthContext } from '../../context/AuthContext';
 import './messenger.css';
 
 function Messenger() {
@@ -12,33 +12,62 @@ function Messenger() {
     const [currentChat, setCurrentChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [arrivalMessage, setArrivalMessage] = useState(null);
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    const socket = useRef();
     const scrollRef = useRef();
 
-    // const { user } = useContext(AuthContext);
-    const id = '61e91b8074e5b88cb02ff1bb'; // static define, after change it to dynamic
+    const { user } = useContext(AuthContext);
+    // console.log('user: ', user);
+
+    useEffect(() => {
+        socket.current = io('ws://localhost:5000/');
+
+        socket.current.on('getMessage', (data) => {
+            console.log('getMessage data:', data);
+            setArrivalMessage({
+                sender_id: data.senderId,
+                message: data.message,
+                createdAt: Date.now(),
+            });
+        });
+    }, []);
+
+    useEffect(() => {
+        console.log('arrivalMessage:', arrivalMessage);
+        console.log('currentChat:', currentChat);
+        arrivalMessage &&
+            currentChat?.members.includes(arrivalMessage.sender_id) &&
+            setMessages((prev) => [...prev, arrivalMessage]);
+    }, [arrivalMessage, currentChat]);
+
+    useEffect(() => {
+        socket.current.emit('addUser', user._id);
+        socket.current.on('getUsers', (users) => {
+            // console.log(users);
+            setOnlineUsers(users);
+        });
+    }, [user]);
 
     useEffect(() => {
         const getConversation = async () => {
             try {
-                const res = await axios.get('/conversation/' + id);
-                // console.log(res);
+                const res = await axios.get('/conversations/' + user._id);
                 setConversations(res.data.conversations);
-                // console.log(res.data.conversations);
+                // console.log('conversations:', res.data.conversations);
             } catch (err) {
                 console.log(err);
             }
         };
         getConversation();
-    }, [id]);
-
-    // console.log(currentChat);
+    }, [user._id]);
 
     useEffect(() => {
         const getMessages = async () => {
             try {
                 const res = await axios.get('/messages/' + currentChat?._id);
                 setMessages(res.data.messages);
-                console.log(res.data.messages);
+                // console.log('messages: ', res.data.messages);
             } catch (err) {
                 console.log(err);
             }
@@ -46,20 +75,28 @@ function Messenger() {
         getMessages();
     }, [currentChat]);
 
-    // console.log('messages : ', messages);
-
     const handleSubmit = async (e) => {
         e.preventDefault(); // not refresh the page
         const message = {
-            sender_id: id,
+            sender_id: user._id,
             message: newMessage,
             conversation_id: currentChat?._id,
         };
 
+        const receiverId = currentChat.members.find(
+            (member) => member !== user._id
+        );
+
+        socket.current.emit('sendMessage', {
+            senderId: user._id,
+            receiverId,
+            message: newMessage,
+        });
+
         try {
             const res = await axios.post('/messages', message);
-            console.log(res.data.message);
-            setMessages([...messages, res.data.message]);
+            console.log(res.data.result);
+            setMessages([...messages, res.data.result]);
             setNewMessage('');
         } catch (err) {
             console.log(err);
@@ -72,7 +109,6 @@ function Messenger() {
 
     return (
         <>
-            {/* <Navbar /> */}
             <Topbar />
             <div className='messenger'>
                 <div className='chatMenu'>
@@ -84,8 +120,9 @@ function Messenger() {
                         {conversations.map((c) => (
                             <div onClick={() => setCurrentChat(c)}>
                                 <Conversation
+                                    key={c._id}
                                     conversation={c}
-                                    currentUser={id}
+                                    currentUser={user}
                                 />
                             </div>
                         ))}
@@ -99,8 +136,9 @@ function Messenger() {
                                     {messages.map((m) => (
                                         <div ref={scrollRef}>
                                             <Message
+                                                key={m._id}
                                                 message={m}
-                                                own={m?.sender_id === id}
+                                                own={m.sender_id === user._id}
                                             />
                                         </div>
                                     ))}
@@ -130,9 +168,11 @@ function Messenger() {
                 </div>
                 <div className='chatOnline'>
                     <div className='chatOnlineWrapper'>
-                        <ChatOnline />
-                        <ChatOnline />
-                        <ChatOnline />
+                        {/* <ChatOnline
+                            onlineUsers={onlineUsers}
+                            currentId={user._id}
+                            setCurrentChat={setCurrentChat}
+                        /> */}
                     </div>
                 </div>
             </div>

@@ -1,12 +1,30 @@
 import './topbar.css';
-import { Search, Person, Chat, Notifications } from '@material-ui/icons';
+import { Person, Chat, Notifications } from '@material-ui/icons';
+import { Button } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router';
+import { logout } from '../../actions/auth';
+import decode from 'jwt-decode';
 
 export default function Topbar() {
+    const dispatch = useDispatch();
+    const history = useHistory();
+
     const { user } = useContext(AuthContext);
     const PF = process.env.REACT_APP_PUBLIC_FOLDER;
+
+    const logout = () => {
+        logout(dispatch, history);
+    };
+
+    const token = user.auth_token;
+    if (token) {
+        const decodeToken = decode(token);
+        if (decodeToken.exp * 1000 < new Date().getTime()) logout();
+    }
 
     return (
         <div className='topbarContainer'>
@@ -18,7 +36,9 @@ export default function Topbar() {
             <div className='topbarRight'>
                 <div className='topbarIcons'>
                     <div className='topbarIconItem'>
-                        <Person />
+                        <Button onClick={logout}>
+                            <Person />
+                        </Button>
                     </div>
                     <div className='topbarIconItem'>
                         <Chat />
