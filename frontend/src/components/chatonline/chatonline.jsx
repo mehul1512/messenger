@@ -1,7 +1,7 @@
 import React from 'react';
 import './chatOnline.css';
 
-function ChatOnline() {
+function ChatOnline({ onlineUsers, currentId, setCurrentChat }) {
     return (
         <div className='chatOnline'>
             <div className='chatOnlineFriend'>

@@ -37,7 +37,7 @@ const LoginUser = async (req, res) => {
         await User.findOneAndUpdate({ email: email }, { auth_token: token });
         existingUser.auth_token = token;
 
-        res.status(200).json({ code: 200, result: existingUser, token });
+        res.status(200).json({ existingUser });
     } catch (err) {
         return res
             .status(500)
@@ -84,11 +84,11 @@ const registerUser = async (req, res) => {
         // //add auth_token to user data
         // await User.findOneAndUpdate({ email: email }, { auth_token: token });
 
-        res.status(200).json({ code: 200, result, token });
+        res.status(200).json({ result });
     } catch (error) {
         return res
             .status(500)
-            .json({ code: 500, message: 'Something went to wrong!!' });
+            .json({ code: 500, message: 'Something went to wrong!!', error });
     }
 };
 

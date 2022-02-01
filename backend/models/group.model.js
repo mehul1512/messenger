@@ -9,12 +9,13 @@ const GroupSchema = new mongoose.Schema(
         about: {
             type: String,
             default: '',
+            max: 500,
         },
         type: {
             type: String,
             default: 'private',
         },
-        members: {
+        conversation_id: {
             // conversation_id from Conversation table
             type: String,
             required: true,
